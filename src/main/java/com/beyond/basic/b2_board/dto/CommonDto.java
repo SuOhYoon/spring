@@ -5,13 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class AuthorListDto {
-private Long id;
-    private String name;
-
+public class CommonDto {
+    private Object response;
+    private int status_code;
+    private String status_message;
 }

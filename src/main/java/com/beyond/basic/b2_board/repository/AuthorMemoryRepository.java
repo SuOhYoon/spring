@@ -25,9 +25,7 @@ public class AuthorMemoryRepository {
     }
 
     public Optional<Author> findById(Long id){
-        return  authorList.stream().filter(a -> a.getId().equals(id)).findFirst();
-
-
+        return authorList.stream().filter(a -> a.getId().equals(id)).findFirst();
     }
 
     public Optional<Author> findByEmail(String email){

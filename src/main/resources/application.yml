@@ -1,0 +1,15 @@
+# 프로젝트 이름 설정 예시
+# spring.application.name=basic
+# 서버 포트 기본값은 8080입니다.
+# server.port=8080
+
+server:
+  port: 8080
+
+spring:
+# 아래는 jdbc의 기본 db관련 설정인데, jdbc뿐만 아니라 mybatis, jpa등 spring의 대부분의 db기술에 동일하게 사용
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3308/board
+    username: root
+    password: 1234

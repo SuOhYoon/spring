@@ -4,17 +4,21 @@ import com.beyond.basic.b2_board.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePw;
-import com.beyond.basic.b2_board.repository.AuthorMemoryRepository;
+import com.beyond.basic.b2_board.repository.AuthorJdbcRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 //Component로 대체 가능 (트랜잭션 처리가 없는 경우)
 @Service
 @RequiredArgsConstructor
+// 스프링에서 메서드단위로 트랜잭션처리를 하고, 만약 예외(unchecked exception) 발생시 자동 롤백처리 지원.
+@Transactional
 public class AuthorService {
 
     //의존성 주입 ( DI ) 방법 1. AutoWired 어노테이션 사용 - > 필드 주입
@@ -34,40 +38,40 @@ public class AuthorService {
 
     // 의존성 주입방법 3. RequiredArgs 어노테이션 사용 -> 반드시 초기화 되어야 하는 필드(final 등)을 대상으로 생성자를 자동생성
 // 다형성 설계는 불가
-    private final AuthorMemoryRepository authorMemoryRepository;
+    private final AuthorJdbcRepository authorJdbcRepository;
 
 
     //객체 조립은 서비스 담당
     public void save(AuthorCreateDto authorCreateDto){
         //이메일 중복 검증
-        authorMemoryRepository.findByEmail(authorCreateDto.getEmail()).ifPresent(a -> { throw new IllegalArgumentException("이미 존재하는 이메일입니다."); });
+        authorJdbcRepository.findByEmail(authorCreateDto.getEmail()).ifPresent(a -> { throw new IllegalArgumentException("이미 존재하는 이메일입니다."); });
         //비밀번호 길이 검증
-
-        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getPassword(), authorCreateDto.getEmail());
-        this.authorMemoryRepository.save(author);
+//        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getPassword(), authorCreateDto.getEmail());
+//        toEntity 패턴을 통해 Author객체 조립을 공통화
+        Author author = authorCreateDto.authorToEntity();
+        this.authorJdbcRepository.save(author);
     }
+//    트랜잭션이 필요없는 경우, 아래와 같이 명시적으로 제외
+    @Transactional(readOnly = true)
     public List<AuthorListDto> findAll(){
-        List<AuthorListDto> authorListDto = new ArrayList<>();
-        for(Author author : this.authorMemoryRepository.findAll()){
-            authorListDto.add(new AuthorListDto(author.getId(),author.getName()));
-        }
-        return authorListDto;
+        return authorJdbcRepository.findAll().stream()
+                .map(a->a.listFromEntity()).collect(Collectors.toList());
     }
+    @Transactional(readOnly = true)
     public AuthorDetailDto findById(Long id) throws NoSuchElementException{
-
-        Author author = this.authorMemoryRepository.findById(id).orElseThrow(()->new NoSuchElementException("검색된 결과가 없습니다."));
-
-        return new AuthorDetailDto(author.getId(),author.getName());
+        Author author = authorJdbcRepository.findById(id).orElseThrow(()->new NoSuchElementException("검색된 결과가 없습니다."));
+        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
+        return dto;
     }
 
     public void updatePassword(AuthorUpdatePw authorUpdatePw){
-        Author author = this.authorMemoryRepository.findByEmail(authorUpdatePw.getEmail()).orElseThrow(()->new NoSuchElementException("비밀번호 변경에 실패했습니다."));
+        Author author = this.authorJdbcRepository.findByEmail(authorUpdatePw.getEmail()).orElseThrow(()->new NoSuchElementException("비밀번호 변경에 실패했습니다."));
         author.updatePw(authorUpdatePw.getPassword());
     }
 
     public void delete(Long id){
-        this.authorMemoryRepository.findById(id).orElseThrow(()->new NoSuchElementException("회원 탈퇴에 실패하였습니다."));
-        this.authorMemoryRepository.delete(id);
+        this.authorJdbcRepository.findById(id).orElseThrow(()->new NoSuchElementException("회원 탈퇴에 실패하였습니다."));
+        this.authorJdbcRepository.delete(id);
     }
 
 
