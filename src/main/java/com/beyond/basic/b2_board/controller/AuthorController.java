@@ -71,7 +71,7 @@ public class AuthorController {
 
     //회원퇄퇴(삭제) : /author/1
     @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable Long id){
+    public String delete(@PathVariable("id") Long id){
         try{
             this.authorService.delete(id);
             return "회원 탈퇴 완료";

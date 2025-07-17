@@ -4,7 +4,7 @@ import com.beyond.basic.b2_board.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePw;
-import com.beyond.basic.b2_board.repository.AuthorJdbcRepository;
+import com.beyond.basic.b2_board.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,40 +38,39 @@ public class AuthorService {
 
     // 의존성 주입방법 3. RequiredArgs 어노테이션 사용 -> 반드시 초기화 되어야 하는 필드(final 등)을 대상으로 생성자를 자동생성
 // 다형성 설계는 불가
-    private final AuthorJdbcRepository authorJdbcRepository;
-
-
+      private final AuthorRepository authorRepository;
     //객체 조립은 서비스 담당
     public void save(AuthorCreateDto authorCreateDto){
         //이메일 중복 검증
-        authorJdbcRepository.findByEmail(authorCreateDto.getEmail()).ifPresent(a -> { throw new IllegalArgumentException("이미 존재하는 이메일입니다."); });
+        authorRepository.findByEmail(authorCreateDto.getEmail()).ifPresent(a -> { throw new IllegalArgumentException("이미 존재하는 이메일입니다."); });
         //비밀번호 길이 검증
 //        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getPassword(), authorCreateDto.getEmail());
 //        toEntity 패턴을 통해 Author객체 조립을 공통화
         Author author = authorCreateDto.authorToEntity();
-        this.authorJdbcRepository.save(author);
+        this.authorRepository.save(author);
     }
 //    트랜잭션이 필요없는 경우, 아래와 같이 명시적으로 제외
     @Transactional(readOnly = true)
     public List<AuthorListDto> findAll(){
-        return authorJdbcRepository.findAll().stream()
+        return authorRepository.findAll().stream()
                 .map(a->a.listFromEntity()).collect(Collectors.toList());
     }
     @Transactional(readOnly = true)
     public AuthorDetailDto findById(Long id) throws NoSuchElementException{
-        Author author = authorJdbcRepository.findById(id).orElseThrow(()->new NoSuchElementException("검색된 결과가 없습니다."));
+        Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("검색된 결과가 없습니다."));
         AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
         return dto;
     }
 
     public void updatePassword(AuthorUpdatePw authorUpdatePw){
-        Author author = this.authorJdbcRepository.findByEmail(authorUpdatePw.getEmail()).orElseThrow(()->new NoSuchElementException("비밀번호 변경에 실패했습니다."));
+        Author author = authorRepository.findByEmail(authorUpdatePw.getEmail()).orElseThrow(()->new NoSuchElementException("비밀번호 변경에 실패했습니다."));
+//        dirty checking : 객체를 수정 후 별도의 update쿼리 발생시키지 않아도, 영속성 컨텍스트에 의해 객체 변경사항 자동 DB 반영
         author.updatePw(authorUpdatePw.getPassword());
     }
 
     public void delete(Long id){
-        this.authorJdbcRepository.findById(id).orElseThrow(()->new NoSuchElementException("회원 탈퇴에 실패하였습니다."));
-        this.authorJdbcRepository.delete(id);
+        Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("회원 탈퇴에 실패하였습니다."));
+        authorRepository.delete(author);
     }
 
 

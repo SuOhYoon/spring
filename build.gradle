@@ -27,8 +27,8 @@ dependencies {
 //  아래 의존성은 db연결 및 관리를 위한 의존성 : jdbc,mybatis,jpa
 //	db의존성은 바로 db정보를 찾아 연결을 시도하므로, db연결정보 사전설정 필요.
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
 
