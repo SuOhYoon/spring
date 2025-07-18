@@ -1,9 +1,9 @@
 package com.beyond.basic.b2_board.common;
 
-import com.beyond.basic.b2_board.dto.CommonErrorDto;
-import com.sun.net.httpserver.HttpsServer;
+import com.beyond.basic.b2_board.author.dto.CommonErrorDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -27,4 +27,11 @@ public class CommonExceptionHandler {
     public ResponseEntity<?> sqlDataException(SQLDataException e){
         return new ResponseEntity<>(new CommonErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> validationError(MethodArgumentNotValidException e){
+        String errorMessage = e.getBindingResult().getFieldError().getDefaultMessage();
+        return new ResponseEntity<>(new CommonErrorDto(HttpStatus.BAD_REQUEST.value(), errorMessage), HttpStatus.BAD_REQUEST);
+    }
+
 }

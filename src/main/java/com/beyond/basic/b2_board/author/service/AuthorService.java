@@ -1,15 +1,15 @@
-package com.beyond.basic.b2_board.service;
-import com.beyond.basic.b2_board.domain.Author;
-import com.beyond.basic.b2_board.dto.AuthorCreateDto;
-import com.beyond.basic.b2_board.dto.AuthorDetailDto;
-import com.beyond.basic.b2_board.dto.AuthorListDto;
-import com.beyond.basic.b2_board.dto.AuthorUpdatePw;
-import com.beyond.basic.b2_board.repository.AuthorRepository;
+package com.beyond.basic.b2_board.author.service;
+import com.beyond.basic.b2_board.author.domain.Author;
+import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
+import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
+import com.beyond.basic.b2_board.author.dto.AuthorListDto;
+import com.beyond.basic.b2_board.author.dto.AuthorUpdatePw;
+import com.beyond.basic.b2_board.author.repository.AuthorRepository;
+import com.beyond.basic.b2_board.post.domain.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -58,8 +58,15 @@ public class AuthorService {
     @Transactional(readOnly = true)
     public AuthorDetailDto findById(Long id) throws NoSuchElementException{
         Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("검색된 결과가 없습니다."));
-        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
-        return dto;
+//        AuthorDetailDto dto1 = AuthorDetailDto.detailFromEntity();
+
+//        연관관계설정 없이 직접 조회해서 count값 설정하는 경우
+//        List<Post> postList = postRepository.findByAuthorr(author);
+//        AuthorDetailDto dto2 = AuthorDetailDto.fromEntity(author);
+
+//        OneToMany연관관계 설정을 통해 count값 찾는 경우
+        AuthorDetailDto dto2 = AuthorDetailDto.fromEntity(author);
+        return dto2;
     }
 
     public void updatePassword(AuthorUpdatePw authorUpdatePw){
