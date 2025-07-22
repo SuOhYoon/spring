@@ -37,11 +37,11 @@ public class JwtTokenFilter extends GenericFilter {
                             .build()
                             .parseClaimsJws(token)
                             .getBody();
+
         List<GrantedAuthority> authorities = new ArrayList<>();
 //        authentication 객체를 만들때 권한은 ROLE_ 라는 키워드를 붙여서 만들어 주는것이 추후 문제 발생 X
         authorities.add(new SimpleGrantedAuthority("ROLE_" + claims.get("role")));
         Authentication authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }

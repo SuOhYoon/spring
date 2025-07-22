@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController // Controller + ResponseBody
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class AuthorController {
     }
 
     @PostMapping("/doLogin")
-    public  ResponseEntity<?>  login(@RequestBody AuthorLoginDto authorLoginDto){
+    public ResponseEntity<?> login(@RequestBody AuthorLoginDto authorLoginDto){
         Author author = authorService.doLogin(authorLoginDto);
 //        토큰 생성 및 return
         String token = jwtTokenProvider.createAtToken(author);
@@ -53,22 +54,22 @@ public class AuthorController {
     @PreAuthorize("hasRole('ADMIN')")
     public List<AuthorListDto> findAll(){
         return this.authorService.findAll();
+
     }
 
     //회원 상세 조회 : id로 조회 author/detail/1
     // 서버에서 별도의 try catch 하지 않으면, 에러 발생ㅅ ㅣ500에러 + 스프링의 포맷으로 에러 리턴
     @GetMapping("/detail/{id}")
-//    ADMIN권한이 있는지 쉽게 확인
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> findById(@PathVariable("id") Long id){
-//        try{
-//            return new ResponseEntity<>(new CommonDto(authorService.findById(id), HttpStatus.OK.value(), "OK"), HttpStatus.OK);
-//        }catch (RuntimeException e){
-//            e.printStackTrace();
-//            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.NOT_FOUND.value(), e.getMessage()), HttpStatus.NOT_FOUND);
-//        }
-        AuthorDetailDto result = authorService.findById(id); // 반환 타입에 맞게 수정
-        return new ResponseEntity<>(new CommonDto(result, HttpStatus.OK.value(), "성공"), HttpStatus.OK);
+    // ADMIN 권한이 있는지를 authentication 객체에서 쉽게 확인
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
+    public ResponseEntity<?> findById(@PathVariable Long id){
+        try{
+            AuthorDetailDto author = this.authorService.findById(id);
+            return new ResponseEntity<>(new CommonDto(author,HttpStatus.ACCEPTED.value(), "유저 조회 성공"), HttpStatus.ACCEPTED);
+        }catch (NoSuchElementException e){
+            e.printStackTrace();
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.NOT_FOUND.value(), "회원 조회 실패"), HttpStatus.NOT_FOUND);
+        }
     }
 
     //비밀번호 수정 : email,password -> json

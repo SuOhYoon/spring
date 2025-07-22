@@ -40,7 +40,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + 1000 * 60 * 30L)) // 30분을 세팅(밀리초로)
+                .setExpiration(new Date(now.getTime() + expirationAt*60*1000L)) // 30분을 세팅(밀리초로)
 //                secret키를 통해 signature 생성
                 .signWith(secret_at_key)
                 .compact();
