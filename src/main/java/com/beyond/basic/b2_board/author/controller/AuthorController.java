@@ -1,11 +1,14 @@
 package com.beyond.basic.b2_board.author.controller;
 
+import com.beyond.basic.b2_board.author.domain.Author;
 import com.beyond.basic.b2_board.author.dto.*;
 import com.beyond.basic.b2_board.author.service.AuthorService;
+import com.beyond.basic.b2_board.common.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.List;
 public class AuthorController {
     //서비스 주입받기
     private final AuthorService authorService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //회원가입
     @PostMapping("/create")
@@ -34,8 +38,19 @@ public class AuthorController {
         return new ResponseEntity<>("OK", HttpStatus.CREATED);
     }
 
+    @PostMapping("/doLogin")
+    public  ResponseEntity<?>  login(@RequestBody AuthorLoginDto authorLoginDto){
+        Author author = authorService.doLogin(authorLoginDto);
+//        토큰 생성 및 return
+        String token = jwtTokenProvider.createAtToken(author);
+
+        return new ResponseEntity<>(new CommonDto(token, HttpStatus.OK.value(), "token is created"), HttpStatus.OK);
+    }
+
+
     //회원목록 조회
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<AuthorListDto> findAll(){
         return this.authorService.findAll();
     }
@@ -43,6 +58,8 @@ public class AuthorController {
     //회원 상세 조회 : id로 조회 author/detail/1
     // 서버에서 별도의 try catch 하지 않으면, 에러 발생ㅅ ㅣ500에러 + 스프링의 포맷으로 에러 리턴
     @GetMapping("/detail/{id}")
+//    ADMIN권한이 있는지 쉽게 확인
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findById(@PathVariable("id") Long id){
 //        try{
 //            return new ResponseEntity<>(new CommonDto(authorService.findById(id), HttpStatus.OK.value(), "OK"), HttpStatus.OK);
@@ -68,14 +85,12 @@ public class AuthorController {
 
     //회원퇄퇴(삭제) : /author/1
     @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Long id){
-        try{
+    public String delete(@PathVariable("id") Long id) {
+        try {
             this.authorService.delete(id);
             return "회원 탈퇴 완료";
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return e.getMessage();
         }
     }
-
-
 }

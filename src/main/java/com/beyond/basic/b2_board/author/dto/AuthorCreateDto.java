@@ -21,11 +21,11 @@ public class AuthorCreateDto {
     private String password;
 //    문자열로 값이 넘어오면 Role에 값으로 매핑
     private Role role = Role.USER;
-    public Author authorToEntity(){
+    public Author authorToEntity(String encodedPassword){
         return Author.builder()
                 .email(this.email)
                 .name(this.name)
-                .password(this.password)
+                .password(encodedPassword)
                 .build();
     }
 }

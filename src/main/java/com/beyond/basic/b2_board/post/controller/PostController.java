@@ -35,7 +35,7 @@ public class PostController {
     }
 
     @GetMapping("/list")
-//    페이징 처리를 위한 데이터 요청 형식 : 8080/post/list?paging=0&size=20&sort=title ,asc
+//    페이징 처리를 위한 데이터 요청 형식 : 8080/post/list?page=0&size=20&sort=title,asc
     public ResponseEntity<?> postList(@PageableDefault(size=10, sort="id", direction= Sort.Direction.DESC)Pageable pageable){
         Page<PostListDto> postListDtoList = postService.findByAll(pageable);
         return new ResponseEntity<>(new CommonDto(postListDtoList, HttpStatus.OK.value(), "OK"), HttpStatus.OK);

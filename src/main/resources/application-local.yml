@@ -27,10 +27,14 @@ spring:
 #      create : 매번(서버재시작) table을 drop후 재생성
 #      update : entity 변경사항만 alter를 적용하고 기존데이터 유지.
 #      validate : 실제DB와의 차이점을 check만 하고 ddl문 실행x, 콘솔로만 변경사항 출력.
-      ddl-auto: update
+      ddl-auto: create
 #      콘솔창에 ddl, dml 등의 쿼리를 출력하여 보여주는 옵션
     show-sql: true
 
+jwt:
+  expirationAt: 1000
+#  인코딩된 문자 32자 이상 필요.(특수문자x)
+  securityAt: YmV5b25kYWNjZXNzdG9rZW5zZWNyZXRrZXliZXlvbmRhY2Nlc3N0b2tlbnNlY3JldGtleWJleW9uZGFjY2Vzc3Rva2Vuc2VjcmV0a2V5
 logging:
   level:
 #    debug, info, error 로그 출력
