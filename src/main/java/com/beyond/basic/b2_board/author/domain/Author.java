@@ -94,4 +94,8 @@ public class Author extends BaseTimeEntity {
                 ", email='" + email + '\'' +
                 '}';
     }
+
+    public void updateImgUrl(String imgUrl) {
+        this.profileImage = imgUrl;
+    }
 }

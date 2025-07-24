@@ -1,4 +1,3 @@
-
 package com.beyond.basic.b2_board.author.service;
 
 import com.beyond.basic.b2_board.author.domain.Author;
@@ -9,12 +8,18 @@ import com.beyond.basic.b2_board.post.domain.Post;
 import com.beyond.basic.b2_board.post.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -48,9 +53,13 @@ public class AuthorService {
     private final AuthorRepository authorRepository;
     private final PostRepository postRepository;
     private final PasswordEncoder passwordEncoder;
+    private final S3Client s3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     //객체 조립은 서비스 담당
-    public void save(AuthorCreateDto authorCreateDto){
+    public void save(AuthorCreateDto authorCreateDto, MultipartFile profileImage){
         //이메일 중복 검증
         authorRepository.findByEmail(authorCreateDto.getEmail()).ifPresent(a -> { throw new IllegalArgumentException("이미 존재하는 이메일입니다."); });
         //비밀번호 길이 검증
@@ -59,18 +68,38 @@ public class AuthorService {
 
         // cascading 테스트 : 회원이 생성될 때, 곧바로 "가입인사" 글을 생성하는 상황
         // 방법 1 : 직접 POST 객체 생성 후 저장
-        Post post = Post.builder()
-                .title("안녕하세요")
-                .contents(authorCreateDto.getName()+"입니다. 반갑습니다.")
-//                author객체가 db에 save되는 순간 엔티티메니저..
-                .author(author)
-                .delYn("N")
-                .build();
+//        Post post = Post.builder()
+//                .title("안녕하세요")
+//                .contents(authorCreateDto.getName()+"입니다. 반갑습니다.")
+//                .author(author)
+//                .delYn("N")
+//                .build();
 //        postRepository.save(post);
         // 방법 2: cascade 옵션 활용
-        author.getPostList().add(post);
+//        author.getPostList().add(post);
         this.authorRepository.save(author);
 
+        // image명 설정
+        String fileName = "user-"+author.getId()+"-profileimage-"+profileImage.getOriginalFilename();
+
+        // 저장 객체 구성
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(fileName)
+                .contentType(profileImage.getContentType()) // image//jpg
+                .build();
+
+        // 이미지를 업로드 ( byte 형태로 )
+        try {
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(profileImage.getBytes()));
+        } catch (IOException e) {
+            // checked -> unchecked로 바꿔 전체 rollback 되도록 예외처리
+            throw new IllegalArgumentException("이미지 업로드 실패");
+        }
+
+        //이미지 url 추출
+        String imgUrl = s3Client.utilities().getUrl(a->a.bucket(bucket).key(fileName)).toExternalForm();
+        author.updateImgUrl(imgUrl);
     }
 
     @Transactional(readOnly = true)

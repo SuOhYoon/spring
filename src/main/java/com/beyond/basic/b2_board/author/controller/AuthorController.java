@@ -24,7 +24,14 @@ public class AuthorController {
     //서비스 주입받기
     private final AuthorService authorService;
     private final JwtTokenProvider jwtTokenProvider;
-
+    /*
+     * 아래 코드 포스트맨 테스트 데이터 예시
+     *  1. multipart-formdata 선택
+     *  2. authorCreateDto를 text로 {"name" : "yoon", "email" : "yoon@naver.com", "password" : "12345678"}
+     *  세팅하면서 content-type을 application/json 설정
+     *  3. profileImage는 file로 세팅하면서 content-type을 multipart/form-data로 설정
+     *
+     */
     //회원가입
 
     @PostMapping("/create")
@@ -47,7 +54,7 @@ public class AuthorController {
         //controllerAdvice로 예외를 전역적으로 처리하는 게 가능함.
 //        this.authorService.save(authorCreateDto);
 
-        this.authorService.save(authorCreateDto);
+        this.authorService.save(authorCreateDto, profileImage);
         return new ResponseEntity<>("회원가입 완료", HttpStatus.CREATED);
     }
 
