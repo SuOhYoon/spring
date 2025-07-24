@@ -1,4 +1,4 @@
 #spring은 실행시 무조건 application.yml을 찾음
 spring:
   profiles:
-    active: local
+    active: prod

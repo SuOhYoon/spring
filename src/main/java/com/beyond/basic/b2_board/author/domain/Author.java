@@ -37,7 +37,9 @@ public class Author extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default // 빌더 패턴에서 변수 초기화 시 Builder.default 필수
     private Role role = Role.USER;
-    //컬럼명에 캐멀케이스 사용 시, db에는 created_time으로 컬럼 생성
+
+    private String profileImage;
+
 
     //OneToMany는 선택 사항이다. 또한 default가 lazy다.
     //mappedBy 에는 ManyToOne쪽에 변수명을 문자열로 지정 fk 관리를 반대편 쪽에서 한다는 의미 -> 연관관계 주인 설정
@@ -62,6 +64,15 @@ public class Author extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "author")
     private Adress adress;
+
+//    컬럼명에 캐멀케이스 사용 시, db에는 created_time으로 컬럼 생성
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     public void updatePw(String password) {
         this.password = password;
     }

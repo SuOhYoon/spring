@@ -12,12 +12,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PostListDto {
     private Long id;
+    private String category;
     private String title;
     private String email;
 
     public static PostListDto fromEntity(Post post){
         return PostListDto.builder()
                 .id(post.getId())
+                .category(post.getCategory())
                 .title(post.getTitle())
                 .email(post.getAuthor().getEmail())
                 .build();
