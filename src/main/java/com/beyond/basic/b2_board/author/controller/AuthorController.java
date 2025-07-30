@@ -37,7 +37,7 @@ public class AuthorController {
     @PostMapping("/create")
     //dto에 있는 validation어노테이션과 controller의 @Valid 한쌍
     public ResponseEntity<String> save(@RequestPart(name = "authorCreateDto") @Valid AuthorCreateDto authorCreateDto,
-                                       @RequestPart(name = "profileImage")MultipartFile profileImage) {
+                                       @RequestPart(name = "profileImage", required = false)MultipartFile profileImage) {
         System.out.println(profileImage.getOriginalFilename());
 //        try{
 //        this.authorService.save(authorCreateDto);

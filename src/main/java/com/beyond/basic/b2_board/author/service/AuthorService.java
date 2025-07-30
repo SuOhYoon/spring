@@ -64,7 +64,7 @@ public class AuthorService {
         authorRepository.findByEmail(authorCreateDto.getEmail()).ifPresent(a -> { throw new IllegalArgumentException("이미 존재하는 이메일입니다."); });
         //비밀번호 길이 검증
         String encodedPassword = passwordEncoder.encode(authorCreateDto.getPassword());
-        Author author =authorCreateDto.authorToEntity(encodedPassword);
+        Author author = authorCreateDto.authorToEntity(encodedPassword);
 
         // cascading 테스트 : 회원이 생성될 때, 곧바로 "가입인사" 글을 생성하는 상황
         // 방법 1 : 직접 POST 객체 생성 후 저장
@@ -92,7 +92,7 @@ public class AuthorService {
         // 이미지를 업로드 ( byte 형태로 )
         try {
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(profileImage.getBytes()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             // checked -> unchecked로 바꿔 전체 rollback 되도록 예외처리
             throw new IllegalArgumentException("이미지 업로드 실패");
         }

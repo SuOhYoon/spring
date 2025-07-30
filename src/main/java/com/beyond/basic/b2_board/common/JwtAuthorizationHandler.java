@@ -19,7 +19,7 @@ public class JwtAuthorizationHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/jsob");
+        response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         CommonErrorDto dto = new CommonErrorDto(401, "token이 없습니다.");

@@ -27,14 +27,14 @@ public class AuthorJpaRepository {
 //        순수 jpa에서는 제한된 메서드 제공으로 jpql을 사용하여 직접 쿼리 작성하는 경우 많음
 //        jpql : jpql문법은 문자열형식의 raw쿼리가 아닌 객체지향 쿼리 문법
 //        jpql 작성규칙 : db 테이블명/컬럼명이 아니라, 엔티티명/필드명을 기준으로 사용하고, 별칭(alias)를 활용.
-        List<Author> authorList = entityManager.createQuery("select a from Author a", Author.class).getResultList();
+        List<Author> authorList = entityManager.createQuery("select a from Member a", Author.class).getResultList();
         return authorList;
     }
 
     public Optional<Author> findByEmail(String email){
         Author author = null;
         try {
-            author = entityManager.createQuery("select a from Author a where a.email = :email", Author.class)
+            author = entityManager.createQuery("select a from Member a where a.email = :email", Author.class)
                     .setParameter("email", email).getSingleResult();
         } catch (Exception e){
 

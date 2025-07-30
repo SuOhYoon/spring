@@ -28,8 +28,7 @@ public class PostCreateDto {
                 .category(this.category)
                 .title(this.title)
                 .contents(this.contents)
-//                .author(this.authorId) // case1. 관계성 설정 전
-                .author(author)
+//                .author(this.authorId) // case1. 관계성 설정 전        .author(author)
                 .appointment(this.appointment)
                 .appointmentTime(appointmentTime)
                 .delYn("N")
